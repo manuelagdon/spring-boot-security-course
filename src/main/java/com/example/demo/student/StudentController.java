@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/students")
+@RequestMapping("api")
 public class StudentController {
 
     private static final List<Student> STUDENTS = Arrays.asList(
@@ -18,8 +18,18 @@ public class StudentController {
       new Student(3, "Anna Smith")
     );
 
-    @GetMapping(path = "{studentId}")
+    @GetMapping(path = "/v1/students/{studentId}")
     public Student getStudent(@PathVariable("studentId") Integer studentId) {
+        return STUDENTS.stream()
+                .filter(student -> studentId.equals(student.getStudentId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Student " + studentId + " does not exists"
+                ));
+    }
+
+    @GetMapping(path = "/v2/students/{studentId}")
+    public Student getStudentAuthenticated(@PathVariable("studentId") Integer studentId) {
         return STUDENTS.stream()
                 .filter(student -> studentId.equals(student.getStudentId()))
                 .findFirst()
