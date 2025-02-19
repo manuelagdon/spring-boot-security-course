@@ -33,7 +33,7 @@ public class ApplicationSecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .antMatchers("/", "/index*", "/css/*", "/js/*").permitAll()  // Allow public access to endpoints under /public
                         .antMatchers("/api/v1/**").permitAll() // endpoints with api require authentication
-                        .antMatchers(HttpMethod.GET,"/api/v2/**").hasRole("USER")
+                        .antMatchers(HttpMethod.GET,"/api/v2/**").hasRole("ADMIN")
                         .anyRequest().authenticated() // All other endpoints require authentication
 
                 ) //antMatcher for springboot 2.7.x, requestMatcher for springboot 3.0
@@ -55,12 +55,12 @@ public class ApplicationSecurityConfig {
             .roles("USER")
             .build();
 
-//        UserDetails user2 = User.withDefaultPasswordEncoder()
-//                .username("user2")
-//                .password("pass2")
-//                .roles("USER1")
-//                .build();
+        UserDetails user2 = User.builder()
+                .username("user2")
+                .password(passwordEncoder.encode("pass2"))
+                .roles("ADMIN")
+                .build();
 
-        return new InMemoryUserDetailsManager(user1);
+        return new InMemoryUserDetailsManager(user1, user2);
     }
 }
