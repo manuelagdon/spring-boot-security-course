@@ -36,9 +36,9 @@ public class ApplicationSecurityConfig {
                         .antMatchers("/", "/index*", "/css/*", "/js/*").permitAll()  // Allow public access to endpoints under /public
                         .antMatchers("/api/v1/**").permitAll() // endpoints with api require authentication
                         .antMatchers("/api/v2/**").hasRole("ADMIN")
-                        .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAnyAuthority(COURSE_WRITE.name())
-                        .antMatchers(HttpMethod.POST, "/management/api/**").hasAnyAuthority(COURSE_WRITE.name())
-                        .antMatchers(HttpMethod.PUT, "/management/api/**").hasAnyAuthority(COURSE_WRITE.name())
+                        .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
+                        .antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
+                        .antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
                         .antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMIN_TRAINEE.name())
                         .anyRequest().authenticated() // All other endpoints require authentication
 
@@ -57,22 +57,22 @@ public class ApplicationSecurityConfig {
     @Bean
     public InMemoryUserDetailsManager userDetailsService() {
         UserDetails user1 = User.builder()
-                .username("user1")
-                .password(passwordEncoder.encode("pass1"))
+                .username("user")
+                .password(passwordEncoder.encode("pass"))
                 .roles(ApplicationUserRole.STUDENT.name())
                 .authorities(STUDENT.getGrantedAuthorities())
                 .build();
 
         UserDetails user2 = User.builder()
-                .username("user2")
-                .password(passwordEncoder.encode("pass2"))
+                .username("admin")
+                .password(passwordEncoder.encode("pass"))
                 .roles(ADMIN.name())
                 .authorities(ADMIN.getGrantedAuthorities())
                 .build();
 
         UserDetails user3 = User.builder()
-                .username("trainee1")
-                .password(passwordEncoder.encode("pass3"))
+                .username("trainee")
+                .password(passwordEncoder.encode("pass"))
                 .roles(ApplicationUserRole.ADMIN_TRAINEE.name())
                 .authorities(ADMIN_TRAINEE.getGrantedAuthorities())
                 .build();
