@@ -47,12 +47,15 @@ public class ApplicationSecurityConfig {
                 )
 //                .httpBasic(withDefaults()) //Basic Auth
                 .formLogin() // Form Authorization
-                .loginPage("/login").permitAll()
-                .defaultSuccessUrl("/courses", true)
+                    .loginPage("/login").permitAll()
+                    .defaultSuccessUrl("/courses", true)
+                    .usernameParameter("username")
+                    .passwordParameter("password")
                 .and()
                 .rememberMe() // defaults to 2 weeks
                     .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21)) //tokenRepository if you use postgres, redis, etc
                     .key("something-very-secured")
+                    .rememberMeParameter("december-me") //how to change parameter if u want
                 .and()
                 .logout()
                     .logoutUrl("/logout")
