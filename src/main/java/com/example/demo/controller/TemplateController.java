@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class TemplateController {
 
-    @GetMapping("login")
+    @GetMapping("/login")
     public String getLogin() {
         return "login";
     }
 
-    @GetMapping("courses")
+    @GetMapping("/courses")
     public String getCourses() {
         return "courses";
     }

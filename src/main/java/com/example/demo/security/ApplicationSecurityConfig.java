@@ -3,7 +3,6 @@ package com.example.demo.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,9 +14,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import static com.example.demo.security.ApplicationUserPermission.COURSE_WRITE;
+import java.util.concurrent.TimeUnit;
+
 import static com.example.demo.security.ApplicationUserRole.*;
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -47,12 +46,21 @@ public class ApplicationSecurityConfig {
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) //show xsrf token by default
                 )
 //                .httpBasic(withDefaults()) //Basic Auth
-//                .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 .formLogin() // Form Authorization
                 .loginPage("/login").permitAll()
                 .defaultSuccessUrl("/courses", true)
-
-
+                .and()
+                .rememberMe() // defaults to 2 weeks
+                    .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21)) //tokenRepository if you use postgres, redis, etc
+                    .key("something-very-secured")
+                .and()
+                .logout()
+                    .logoutUrl("/logout")
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+                    .clearAuthentication(true)
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID", "remember-me")
+                    .logoutSuccessUrl("/login")
         ; // Configure HTTP Basic authentication
 
 
