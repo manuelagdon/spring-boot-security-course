@@ -19,6 +19,7 @@ public class StudentManagementController {
     // preAuthorize - can manually override antMatchers
     // hasRole('ROLE_') hasAnyRole('ROLE_') hasAuthority('permission') hasAnyAuthority('permission')
     // can decide whether preAuthorize or via antMatchers
+    // antMatchers deleted as we have preAuthorize setup. Can see git history for example
 
     @GetMapping(path = "/all-students")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_ADMIN_TRAINEE')")

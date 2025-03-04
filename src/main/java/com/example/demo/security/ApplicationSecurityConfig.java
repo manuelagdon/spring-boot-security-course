@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static com.example.demo.security.ApplicationUserPermission.COURSE_WRITE;
@@ -35,24 +36,25 @@ public class ApplicationSecurityConfig {
 
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .antMatchers("/", "/index*", "/css/*", "/js/*").permitAll()  // Allow public access to endpoints under /public
-                        .antMatchers("/api/v1/**").permitAll() // endpoints with api require authentication
-//                        .antMatchers("/api/v2/**").hasRole("ADMIN")
-//                        .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
-//                        .antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
-//                        .antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
-//                        .antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMIN_TRAINEE.name())
-                        //Ordering of ant matchers matter. Be careful of generic matchers and placing them above specific ones
-                        .anyRequest().authenticated() // All other endpoints require authentication
+                    .antMatchers("/", "/index*", "/css/*", "/js/*").permitAll()  // Allow public access to endpoints under /public
+                    .antMatchers("/api/v1/**").hasRole(STUDENT.name()) // endpoints with api require authentication
+                    //Ordering of ant matchers matter. Be careful of generic matchers and placing them above specific ones
+                    .anyRequest().authenticated() // All other endpoints require authentication
 
                 ) //antMatcher for springboot 2.7.x, requestMatcher for springboot 3.0
-                .csrf().disable() //Will explain in next section
-                .httpBasic(withDefaults())
-                .logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+//                .csrf().disable() //Will explain in next section // need to pass CSRF token if csrf is enabled
+                .csrf((csrf) -> csrf
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) //show xsrf token by default
+                )
+//                .httpBasic(withDefaults()) //Basic Auth
+//                .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                .formLogin() // Form Authorization
+                .loginPage("/login").permitAll()
+                .defaultSuccessUrl("/courses", true)
 
 
         ; // Configure HTTP Basic authentication
+
 
         return http.build();
     }
