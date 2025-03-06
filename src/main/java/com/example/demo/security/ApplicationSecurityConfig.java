@@ -1,8 +1,11 @@
 package com.example.demo.security;
 
+import com.example.demo.auth.ApplicationUserDAO;
+import com.example.demo.auth.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,9 +28,13 @@ public class ApplicationSecurityConfig {
     // Define a SecurityFilterChain bean for HTTP security configurations
 
     private final PasswordEncoder passwordEncoder;
+    private final ApplicationUserService applicationUserService;
+
     @Autowired
-    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder) {
+    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder,
+                                     ApplicationUserService applicationUserService) {
         this.passwordEncoder = passwordEncoder;
+        this.applicationUserService = applicationUserService;
     }
 
     @Bean
@@ -94,5 +101,13 @@ public class ApplicationSecurityConfig {
                 .build();
 
         return new InMemoryUserDetailsManager(user1, user2, user3);
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(userDetailsService());
+        return provider;
     }
 }
