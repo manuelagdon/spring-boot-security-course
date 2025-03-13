@@ -1,25 +1,23 @@
 package com.example.demo.security;
 
-import com.example.demo.auth.ApplicationUserDAO;
 import com.example.demo.auth.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.example.demo.security.ApplicationUserRole.*;
+import static com.example.demo.security.ApplicationUserRole.STUDENT;
 
 @Configuration
 @EnableWebSecurity
@@ -77,37 +75,44 @@ public class ApplicationSecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public InMemoryUserDetailsManager userDetailsService() {
-        UserDetails user1 = User.builder()
-                .username("user")
-                .password(passwordEncoder.encode("pass"))
-                .roles(ApplicationUserRole.STUDENT.name())
-                .authorities(STUDENT.getGrantedAuthorities())
-                .build();
-
-        UserDetails user2 = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("pass"))
-                .roles(ADMIN.name())
-                .authorities(ADMIN.getGrantedAuthorities())
-                .build();
-
-        UserDetails user3 = User.builder()
-                .username("trainee")
-                .password(passwordEncoder.encode("pass"))
-                .roles(ApplicationUserRole.ADMIN_TRAINEE.name())
-                .authorities(ADMIN_TRAINEE.getGrantedAuthorities())
-                .build();
-
-        return new InMemoryUserDetailsManager(user1, user2, user3);
-    }
+//    @Bean //removed since implement dao auth instead
+//    public InMemoryUserDetailsManager userDetailsService() {
+//        UserDetails user1 = User.builder()
+//                .username("user")
+//                .password(passwordEncoder.encode("pass"))
+//                .roles(ApplicationUserRole.STUDENT.name())
+//                .authorities(STUDENT.getGrantedAuthorities())
+//                .build();
+//
+//        UserDetails user2 = User.builder()
+//                .username("admin")
+//                .password(passwordEncoder.encode("pass"))
+//                .roles(ADMIN.name())
+//                .authorities(ADMIN.getGrantedAuthorities())
+//                .build();
+//
+//        UserDetails user3 = User.builder()
+//                .username("trainee")
+//                .password(passwordEncoder.encode("pass"))
+//                .roles(ApplicationUserRole.ADMIN_TRAINEE.name())
+//                .authorities(ADMIN_TRAINEE.getGrantedAuthorities())
+//                .build();
+//
+//        return new InMemoryUserDetailsManager(user1, user2, user3);
+//    }
 
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder);
-        provider.setUserDetailsService(userDetailsService());
+        provider.setUserDetailsService(applicationUserService);
         return provider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.authenticationProvider(daoAuthenticationProvider());
+        return authenticationManagerBuilder.build();
     }
 }
